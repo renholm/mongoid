@@ -164,10 +164,14 @@ module Mongoid #:nodoc
     #
     # <tt>config._master({}, "test")</tt>
     def _master(settings)
-      name = settings["database"]
-      host = settings.delete("host") || "localhost"
-      port = settings.delete("port") || 27017
-      self.master = Mongo::Connection.new(host, port, :logger => logger).db(name)
+      if uri = settings.delete('uri')
+        self.master = Mongo::Connection.from_uri(uri, :logger => logger)
+      else
+        name = settings["database"]
+        host = settings.delete("host") || "localhost"
+        port = settings.delete("port") || 27017
+        self.master = Mongo::Connection.new(host, port, :logger => logger).db(name)
+      end
     end
 
     # Get a bunch-o-slaves from settings and names.
